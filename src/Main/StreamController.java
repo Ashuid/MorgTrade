@@ -2,10 +2,10 @@ package Main;
 
 public class StreamController {
 
-    private Controller controller;
+    private UIController uiController;
 
     public void HandleIncomingData(String data) {
-        controller.AddItemToSearchListView("sager");
+        uiController.AddItemToSearchListView("sager");
     }
 
 
