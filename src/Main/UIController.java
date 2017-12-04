@@ -17,12 +17,17 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
+//TODO Lav Keygen class
+//TODO genundersøg om der er nødvendighed for en keygen class hvis vi ikke hånterere mutations
+
+//TODO lav Parser class
+
 //TODO Kun en af hver search ad gangen, en normal search og max en live search.
-//TODO Potentielt en ekstra controller til ui, så midt er router og ui selv holder listen
 
 //TODO Leg med idéen om currency conversion table
 //TODO Spørg og få quotes fra yuki og morten om hvad programmet skal kunne, usecase like.
 
+//Controller for the JavaFX UI element. Handles all user interactions, both in and out.
 public class UIController {
     public ListView<String> searchListView;
     public TabPane tabPane;
@@ -30,6 +35,8 @@ public class UIController {
     public Button demoButton2;
     public TextField modTextField;
     public ListView<String> modListView;
+
+    private Controller controller;
 
     public void DemoUI() {
         searchListView.getItems().add("1");
@@ -76,11 +83,7 @@ public class UIController {
         searchListView.getItems().add(0, input);
     }
 
-    public void ParseIncomingDataFromStream(String data) {
-        //Consume
-    }
-
     public void PerformSearch(ActionEvent actionEvent) {
-
+        controller.PerformSearch("Normal");
     }
 }
