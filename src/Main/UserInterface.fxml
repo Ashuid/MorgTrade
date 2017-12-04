@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane prefHeight="670.0" prefWidth="742.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Main.Controller">
+   <children>
+      <TabPane fx:id="tabPane" prefHeight="400.0" prefWidth="600.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <tabs>
+          <Tab text="Search">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <SplitPane dividerPositions="0.5167224080267558" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <items>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: Grey;">
+                                 <children>
+                                    <ListView fx:id="modListView" maxHeight="200.0" onContextMenuRequested="#DeleteModFromList" style="-fx-background-color: Darkgrey;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                                    <Button layoutX="142.0" layoutY="392.0" mnemonicParsing="false" text="Start Live Search" AnchorPane.bottomAnchor="225.0" />
+                                    <Button fx:id="demoButton" layoutX="14.0" layoutY="392.0" mnemonicParsing="false" onMouseClicked="#DemoUI" text="Demo" AnchorPane.bottomAnchor="225.0" AnchorPane.leftAnchor="14.0" />
+                                    <Button fx:id="demoButton2" layoutX="316.0" layoutY="392.0" mnemonicParsing="false" onMouseClicked="#DemoListPlusOne" text="+1" AnchorPane.bottomAnchor="225.0" AnchorPane.rightAnchor="14.0" />
+                                    <TextField fx:id="modTextField" layoutX="14.0" layoutY="21.0" onKeyPressed="#ModTextFieldHandleEnterKeyPressed" prefHeight="34.0" prefWidth="358.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" />
+                                    <Button layoutX="166.0" layoutY="320.0" mnemonicParsing="false" onAction="#PerformSearch" text="Button" AnchorPane.bottomAnchor="275.0" />
+                                 </children></AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <ListView id="SearchListView" fx:id="searchListView" editable="true" nodeOrientation="LEFT_TO_RIGHT" onContextMenuRequested="#Whisper" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: Grey;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                 </children></AnchorPane>
+                          </items>
+                        </SplitPane>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>
