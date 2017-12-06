@@ -22,12 +22,10 @@ import java.util.logging.Logger;
 
 //TODO lav Parser class
 
-//TODO Kun en af hver search ad gangen, en normal search og max en live search.
-
 //TODO Leg med idéen om currency conversion table
 //TODO Spørg og få quotes fra yuki og morten om hvad programmet skal kunne, usecase like.
 
-//Controller for the JavaFX UI element. Handles all user interactions, both in and out.
+//Controller for the JavaFX UI element. Handles all user interactions.
 public class UIController {
     public ListView<String> searchListView;
     public TabPane tabPane;
@@ -36,7 +34,7 @@ public class UIController {
     public TextField modTextField;
     public ListView<String> modListView;
 
-    private Controller controller;
+    private final Controller controller = new Controller(this);
 
     public void DemoUI() {
         searchListView.getItems().add("1");

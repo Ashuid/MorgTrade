@@ -16,9 +16,6 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    //TODO make custom stylesheet for searchlistview
-    //TODO fix modlistview removing items in focus when right clicking anywhere in the list
-
     public static void main(String[] args) {
         launch(args);
     }

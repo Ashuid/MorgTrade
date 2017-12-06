@@ -1,21 +1,38 @@
 package Main;
 
+import org.json.simple.JSONObject;
+
+import java.util.Iterator;
+
 //Acts as a router for the program and helps prevent wait time in running processes
 public class Controller {
 
-    private StreamController streamController;
     private UIController uiController;
 
-    public String ParseIncomingDataFromStream(String data) {
-        return "";
+    public Controller (UIController uiController){
+        this.uiController = uiController;
+    }
+
+    private final StreamController streamController = new StreamController();
+
+    public void ParseIncomingDataFromStream(JSONObject data) {
+        System.out.println(data.toString());
+
+        //TODO Split JSON into all the seperate objects in the new parser class
+        //TODO Move this to another class as this place only routes
+        for (Object key : data.keySet()){
+            String keyString = (String) key;
+            Object value = data.get(keyString);
+            uiController.AddItemToSearchListView(value.toString());
+        }
         //Consume in new threaded class
     }
 
-    public void AddItemToUISearchListView(String input){
-        uiController.AddItemToSearchListView(input);
-    }
+//    public void AddItemToUISearchListView(String input){
+//        uiController.AddItemToSearchListView(input);
+//    }
 
-    public String PerformSearch(String type) {
-        return ParseIncomingDataFromStream(streamController.Search(type));
+    public void PerformSearch(String type) {
+        ParseIncomingDataFromStream(streamController.Search(type));
     }
 }

@@ -1,28 +1,30 @@
 package Main;
 
+import org.json.simple.JSONObject;
+
+//TODO Make threads a thing
 public class StreamController {
 
-    private UIController uiController;
-
-    public void HandleIncomingData(String data) {
-        uiController.AddItemToSearchListView("sager");
-    }
+    //    public void HandleIncomingData(String data) {
+//        uiController.AddItemToSearchListView("sager");
+//    }
 
 
-    public String Search(String type) {
+    public JSONObject Search(String type) {
         if (type.equals("Normal")) {
-            return SearchWithThreadedStream();
+            return SearchWithStream(type);
         } else if (type.equals("Live")) {
-            return SearchWithStream();
+            return SearchWithStream(type);
         }
-        return "Failed to perform search - Consult streamController for issue";
+        return null;
     }
 
-    private String SearchWithThreadedStream() {
-        return "threaded stream";
-    }
+//    private String SearchWithThreadedStream() {
+//        return "threaded stream data";
+//    }
 
-    private String SearchWithStream() {
-        return "basic stream";
+    private JSONObject SearchWithStream(String type) {
+        Stream stream = new Stream();
+        return stream.Querry(type);
     }
 }
