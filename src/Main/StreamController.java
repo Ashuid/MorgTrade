@@ -5,16 +5,12 @@ import org.json.simple.JSONObject;
 //TODO Make threads a thing
 public class StreamController {
 
-    //    public void HandleIncomingData(String data) {
-//        uiController.AddItemToSearchListView("sager");
-//    }
-
-
     public JSONObject Search(String type) {
+        //TODO Fix live mode
         if (type.equals("Normal")) {
-            return SearchWithStream(type);
+            return SearchWithStream();
         } else if (type.equals("Live")) {
-            return SearchWithStream(type);
+            return SearchWithStream();
         }
         return null;
     }
@@ -23,8 +19,8 @@ public class StreamController {
 //        return "threaded stream data";
 //    }
 
-    private JSONObject SearchWithStream(String type) {
+    private JSONObject SearchWithStream() {
         Stream stream = new Stream();
-        return stream.Querry(type);
+        return stream.Querry();
     }
 }

@@ -9,6 +9,7 @@ import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -25,6 +26,10 @@ import java.util.logging.Logger;
 //TODO Leg med idéen om currency conversion table
 
 //TODO Spørg og få quotes fra yuki og morten om hvad programmet skal kunne, usecase like.
+
+//TODO fix alle try-catches så det bliver vist i UI
+
+//TODO add en league picker
 
 //Controller for the JavaFX UI element. Handles all user interactions.
 public class UIController {
@@ -53,7 +58,7 @@ public class UIController {
 
     public void Whisper(ContextMenuEvent event) {
         try {
-            String pickedItem = event.getPickResult().getIntersectedNode().idProperty().getBean().toString();//.split("'")[1];
+            String pickedItem = event.getPickResult().getIntersectedNode().idProperty().getBean().toString().split("'")[1];
             if (pickedItem != null) {
                 //TODO oneline this shit
                 StringSelection selection = new StringSelection(pickedItem);
@@ -83,6 +88,16 @@ public class UIController {
 
     public void AddItemToSearchListView(String input) {
         searchListView.getItems().add(0, input);
+    }
+
+    public void AddItemToSearchListView(JSONObject input) {
+        //TODO add proper display of items
+        try {
+            searchListView.getItems().add(0, "Item Name: " + input.get("itemName") + " - Price: " + input.get("price").toString());
+        } catch (Exception e){
+            System.out.println("Exception occurred on item: " + input.get("itemName") + " - " + input.get("price"));
+            System.out.println("Full item is: " + input.get("demoItem").toString());
+        }
     }
 
     public void PerformSearch(ActionEvent actionEvent) {
