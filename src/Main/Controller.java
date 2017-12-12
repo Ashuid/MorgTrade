@@ -2,8 +2,6 @@ package Main;
 
 import org.json.simple.JSONObject;
 
-import java.util.Iterator;
-
 //Acts as a router for the program and helps prevent wait time in running processes
 public class Controller {
 
@@ -23,14 +21,13 @@ public class Controller {
         for (Object key : data.keySet()){
             String keyString = (String) key;
             Object value = data.get(keyString);
-            uiController.AddItemToSearchListView(value.toString());
+            AddItemToUISearchListView(value.toString());
         }
-        //Consume in new threaded class
     }
 
-//    public void AddItemToUISearchListView(String input){
-//        uiController.AddItemToSearchListView(input);
-//    }
+    public void AddItemToUISearchListView(String input){
+        uiController.AddItemToSearchListView(input);
+    }
 
     public void PerformSearch(String type) {
         ParseIncomingDataFromStream(streamController.Search(type));

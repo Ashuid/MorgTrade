@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 //TODO lav Parser class
 
 //TODO Leg med idéen om currency conversion table
+
 //TODO Spørg og få quotes fra yuki og morten om hvad programmet skal kunne, usecase like.
 
 //Controller for the JavaFX UI element. Handles all user interactions.
@@ -37,6 +38,7 @@ public class UIController {
     private final Controller controller = new Controller(this);
 
     public void DemoUI() {
+        //TODO Remove when no longer needing demo ware
         searchListView.getItems().add("1");
         searchListView.getItems().add("two");
         searchListView.getItems().add("3");
@@ -44,10 +46,16 @@ public class UIController {
         modListView.getItems().add("+# to maximum test");
     }
 
+    public void DemoListPlusOne(MouseEvent mouseEvent) {
+        //TODO Remove when no longer need demo ware
+        AddItemToSearchListView(String.valueOf(ThreadLocalRandom.current().nextInt(0, 100)));
+    }
+
     public void Whisper(ContextMenuEvent event) {
         try {
-            String pickedItem = event.getPickResult().getIntersectedNode().idProperty().getBean().toString().split("'")[1];
+            String pickedItem = event.getPickResult().getIntersectedNode().idProperty().getBean().toString();//.split("'")[1];
             if (pickedItem != null) {
+                //TODO oneline this shit
                 StringSelection selection = new StringSelection(pickedItem);
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clipboard.setContents(selection, null);
@@ -55,10 +63,6 @@ public class UIController {
             }
         } catch (Exception ignored) {
         }
-    }
-
-    public void DemoListPlusOne(MouseEvent mouseEvent) {
-       AddItemToSearchListView(String.valueOf(ThreadLocalRandom.current().nextInt(0, 100)));
     }
 
     public void DeleteModFromList(ContextMenuEvent event) {
