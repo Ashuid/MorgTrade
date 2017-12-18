@@ -15,10 +15,6 @@ public class StreamController {
         return null;
     }
 
-//    private String SearchWithThreadedStream() {
-//        return "threaded stream data";
-//    }
-
     private JSONObject SearchWithStream() {
         Stream stream = new Stream();
         return stream.Querry();

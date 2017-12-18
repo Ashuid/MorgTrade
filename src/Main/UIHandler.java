@@ -1,5 +1,6 @@
 package Main;
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -14,14 +15,12 @@ import org.json.simple.JSONObject;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
-
-//TODO Lav Keygen class
-//TODO genundersøg om der er nødvendighed for en keygen class hvis vi ikke hånterere mutations
-
-//TODO lav Parser class
 
 //TODO Leg med idéen om currency conversion table
 
@@ -32,7 +31,7 @@ import java.util.logging.Logger;
 //TODO add en league picker
 
 //Controller for the JavaFX UI element. Handles all user interactions.
-public class UIController {
+public class UIHandler {
     public ListView<String> searchListView;
     public TabPane tabPane;
     public Button demoButton;
@@ -43,12 +42,7 @@ public class UIController {
     private final Controller controller = new Controller(this);
 
     public void DemoUI() {
-        //TODO Remove when no longer needing demo ware
-        searchListView.getItems().add("1");
-        searchListView.getItems().add("two");
-        searchListView.getItems().add("3");
-        modListView.getItems().add("%# added to test");
-        modListView.getItems().add("+# to maximum test");
+        modListView.getItems().add("+40 to maximum Life");
     }
 
     public void DemoListPlusOne(MouseEvent mouseEvent) {
@@ -101,6 +95,8 @@ public class UIController {
     }
 
     public void PerformSearch(ActionEvent actionEvent) {
-        controller.PerformSearch("Normal");
+        searchListView.getItems().clear();
+        List<String> parameters = modListView.getItems();
+        controller.PerformSearch("Normal", parameters);
     }
 }
