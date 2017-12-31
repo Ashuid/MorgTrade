@@ -1,6 +1,5 @@
 package Main;
 
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -15,20 +14,15 @@ import org.json.simple.JSONObject;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Logger;
 
-//TODO Leg med idéen om currency conversion table
+//TODO Leg med idéen om currency conversion table / Forklar hvorfor det ikke blev til : lightweight
 
 //TODO Spørg og få quotes fra yuki og morten om hvad programmet skal kunne, usecase like.
 
 //TODO fix alle try-catches så det bliver vist i UI
-
-//TODO add en league picker
 
 //Controller for the JavaFX UI element. Handles all user interactions.
 public class UIHandler {
@@ -37,6 +31,7 @@ public class UIHandler {
     public Button demoButton;
     public Button demoButton2;
     public TextField modTextField;
+    public TextField nameTextField;
     public ListView<String> modListView;
 
     private final Controller controller = new Controller(this);
@@ -97,6 +92,13 @@ public class UIHandler {
     public void PerformSearch(ActionEvent actionEvent) {
         searchListView.getItems().clear();
         List<String> parameters = modListView.getItems();
-        controller.PerformSearch("Normal", parameters);
+        controller.PerformSearch("Normal", parameters, nameTextField.getText());
+    }
+
+    public void PerformLiveSearch(ActionEvent actionEvent) {
+        controller.KillSearchThread();
+        searchListView.getItems().clear();
+        List<String> parameters = modListView.getItems();
+        controller.PerformSearch("Live", parameters, nameTextField.getText());
     }
 }

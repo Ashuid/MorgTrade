@@ -13,21 +13,21 @@ public class Controller {
         this.uiHandler = uiHandler;
     }
 
-    private final StreamController streamController = new StreamController();
+    private final StreamController streamController = new StreamController(this);
 
-    public void ParseIncomingDataFromStream(JSONObject data, List<String> parameters) {
-        new DataFilter(this, data, parameters).run();
+    public void ParseIncomingDataFromStream(JSONObject data, List<String> parameters, String name) {
+        new DataFilter(this, data, parameters, name).run();
     }
 
     public void AddItemToUISearchListView(JSONObject input) {
         uiHandler.AddItemToSearchListView(input);
     }
 
-    public void AddItemToUISearchListView(String input) {
-        uiHandler.AddItemToSearchListView(input);
+    public void PerformSearch(String type, List<String> parameters, String name) {
+        ParseIncomingDataFromStream(streamController.Search(type, parameters, name), parameters, name);
     }
 
-    public void PerformSearch(String type, List<String> parameters) {
-        ParseIncomingDataFromStream(streamController.Search(type), parameters);
+    public void KillSearchThread() {
+        streamController.killThread();
     }
 }

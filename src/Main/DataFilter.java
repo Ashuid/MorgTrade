@@ -6,77 +6,92 @@ import org.json.simple.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO skift name med typeline så vi kan søge efter currency og gems også
 public class DataFilter implements Runnable {
 
     private final Controller controller;
     private JSONObject data;
     private List<String> parameters;
+    private String itemName;
     private volatile boolean shouldRun = true;
 
-    public DataFilter(Controller controller, JSONObject data, List<String> parameters) {
+    public DataFilter(Controller controller, JSONObject data, List<String> parameters, String name) {
         this.controller = controller;
         this.data = data;
         this.parameters = parameters;
+        this.itemName = name;
     }
 
     public void stopRunning() {
         shouldRun = false;
     }
 
-    //TODO filter for league
-
     @Override
     public void run() {
         //TODO Make this shit smarter. idk make a an array with shit it should match and only if it matches it all should it pass. This many nested if's are bad
         while (shouldRun) {
-            JSONArray array = (JSONArray) data.get("stashes");
+            if (data != null) {
+                if (data.get("stashes") != null) {
+                    JSONArray array = (JSONArray) data.get("stashes");
 
-            //Loop over each stash from search data
-            for (Object value : array) {
-                JSONObject stashData = (JSONObject) value;
+                    //Loop over each stash from search data
+                    for (Object value : array) {
+                        JSONObject stashData = (JSONObject) value;
 
-                //Filter out all stashes from accounts that no longer exist
-                if (stashData.get("accountName") != null) {
+                        //Filter out all stashes from accounts that no longer exist
+                        if (stashData.get("accountName") != null) {
 
-                    //Filter out all the stashes that does not contain items for sale
-                    if (stashData.get("public") != null) {
+                            //Filter out all the stashes that does not contain items for sale
+                            if (stashData.get("public") != null) {
 
-                        //Filter out all stashes that does not contain items
-                        JSONArray itemsInStash = (JSONArray) stashData.get("items");
-                        if (itemsInStash.size() > 0) {
+                                //Filter out all stashes that does not contain items
+                                JSONArray itemsInStash = (JSONArray) stashData.get("items");
+                                if (!itemsInStash.isEmpty()) {
 
-                            //Loop over all the existing items
-                            for (Object item : (JSONArray) stashData.get("items")) {
-                                JSONObject currentItem = (JSONObject) item;
+                                    //Loop over all the existing items
+                                    for (Object item : (JSONArray) stashData.get("items")) {
+                                        JSONObject currentItem = (JSONObject) item;
 
-                                //Filter out all the empty items and add the rest
-                                if (currentItem != null) {
+                                        //Filter out all the empty items and add the rest
+                                        if (currentItem != null) {
 
-                                    if (MatchesParameters(currentItem)) {
+                                            if (currentItem.get("name").toString().contains(">>")) {
+                                                String[] cleanItemName = currentItem.get("name").toString().split(">>");
 
-                                        JSONObject filteredObject = new JSONObject();
+                                                if (!itemName.equals("")) {
 
-                                        //Add Name of Item
-                                        addItemNameToObject(currentItem, filteredObject);
+                                                    if (cleanItemName[3].contains(itemName) || currentItem.get("typeLine").toString().contains(itemName))
+                                                        CreateObjectForUI(stashData, currentItem);
 
-                                        //Add Price of Item
-                                        addPriceToObject(stashData, currentItem, filteredObject);
-
-                                        //Add Mods to item
-                                        filteredObject.put("Mods", ExtractMods(currentItem));
-                                        System.out.println(ExtractMods(currentItem).toString());
-                                        System.out.println("---------------------------");
-                                        controller.AddItemToUISearchListView(filteredObject);
+                                                } else if (!parameters.isEmpty() && MatchesMods(currentItem)) {
+                                                    CreateObjectForUI(stashData, currentItem);
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+
             }
             stopRunning();
         }
-        System.out.println("Data parser thread stopped running");
+    }
+
+    private void CreateObjectForUI(JSONObject stashData, JSONObject currentItem) {
+        JSONObject filteredObject = new JSONObject();
+
+        //Add Name of Item
+        addItemNameToObject(currentItem, filteredObject);
+
+        //Add Price of Item
+        addPriceToObject(stashData, currentItem, filteredObject);
+
+        //Add Mods to item
+        filteredObject.put("Mods", ExtractMods(currentItem));
+        controller.AddItemToUISearchListView(filteredObject);
     }
 
     private ArrayList<String> ExtractMods(JSONObject item) {
@@ -103,7 +118,7 @@ public class DataFilter implements Runnable {
     }
 
     //TODO Maybe fix to take what matches and above #
-    private Boolean MatchesParameters(JSONObject item) {
+    private Boolean MatchesMods(JSONObject item) {
         if (ExtractMods(item).containsAll(parameters)) {
             return true;
         }

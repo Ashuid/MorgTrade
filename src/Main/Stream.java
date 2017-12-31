@@ -12,11 +12,6 @@ import java.net.URL;
 
 public class Stream implements Runnable{
 
-    //TODO grab key from jsonobject
-
-    private volatile boolean shouldRun = true;
-    private String key = null;
-
     public Stream() {}
 
     public JSONObject Querry() {
@@ -35,7 +30,9 @@ public class Stream implements Runnable{
 
             JSONParser jsonParser = new JSONParser();
 
-            return (JSONObject) jsonParser.parse(reader.readLine());
+            JSONObject data = (JSONObject) jsonParser.parse(reader.readLine());
+
+            return data;
         } catch (IOException | ParseException e) {
             e.printStackTrace();
             System.out.println("Error occurred in Stream");
