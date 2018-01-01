@@ -15,16 +15,16 @@ public class Controller {
 
     private final StreamController streamController = new StreamController(this);
 
-    public void ParseIncomingDataFromStream(JSONObject data, List<String> parameters, String name) {
-        new DataFilter(this, data, parameters, name).run();
+    public void ParseIncomingDataFromStream(JSONObject data, List<String> parameters, String name, boolean priceRequirement) {
+        new DataFilter(this, data, parameters, name, priceRequirement).run();
     }
 
     public void AddItemToUISearchListView(JSONObject input) {
         uiHandler.AddItemToSearchListView(input);
     }
 
-    public void PerformSearch(String type, List<String> parameters, String name) {
-        ParseIncomingDataFromStream(streamController.Search(type, parameters, name), parameters, name);
+    public void PerformSearch(List<String> parameters, String name, boolean priceRequirement) {
+        streamController.Search(parameters, name, priceRequirement);
     }
 
     public void KillSearchThread() {

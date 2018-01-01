@@ -6,20 +6,21 @@ import org.json.simple.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO skift name med typeline så vi kan søge efter currency og gems også
 public class DataFilter implements Runnable {
 
     private final Controller controller;
     private JSONObject data;
     private List<String> parameters;
     private String itemName;
+    private boolean priceRequirement;
     private volatile boolean shouldRun = true;
 
-    public DataFilter(Controller controller, JSONObject data, List<String> parameters, String name) {
+    public DataFilter(Controller controller, JSONObject data, List<String> parameters, String name, boolean priceRequirement) {
         this.controller = controller;
         this.data = data;
         this.parameters = parameters;
         this.itemName = name;
+        this.priceRequirement = priceRequirement;
     }
 
     public void stopRunning() {
@@ -28,7 +29,6 @@ public class DataFilter implements Runnable {
 
     @Override
     public void run() {
-        //TODO Make this shit smarter. idk make a an array with shit it should match and only if it matches it all should it pass. This many nested if's are bad
         while (shouldRun) {
             if (data != null) {
                 if (data.get("stashes") != null) {
@@ -55,16 +55,28 @@ public class DataFilter implements Runnable {
                                         //Filter out all the empty items and add the rest
                                         if (currentItem != null) {
 
-                                            if (currentItem.get("name").toString().contains(">>")) {
-                                                String[] cleanItemName = currentItem.get("name").toString().split(">>");
+                                            if (priceRequirement) {
 
-                                                if (!itemName.equals("")) {
+                                                if (!itemName.isEmpty()) {
 
-                                                    if (cleanItemName[3].contains(itemName) || currentItem.get("typeLine").toString().contains(itemName))
-                                                        CreateObjectForUI(stashData, currentItem);
+                                                    if (currentItem.get("note") != null) {
+                                                        if (!currentItem.get("note").toString().isEmpty() &&
+                                                                hasPrice(currentItem.get("note").toString())) {
 
-                                                } else if (!parameters.isEmpty() && MatchesMods(currentItem)) {
-                                                    CreateObjectForUI(stashData, currentItem);
+                                                            CreateItemIfMatchesSearch(stashData, currentItem);
+                                                        }
+                                                    } else if (stashData.get("stash") != null) {
+                                                        if (!stashData.get("stash").toString().isEmpty() &&
+                                                                hasPrice(stashData.get("stash").toString())) {
+
+                                                            CreateItemIfMatchesSearch(stashData, currentItem);
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+
+                                                if (!itemName.isEmpty()) {
+                                                    CreateItemIfMatchesSearch(stashData, currentItem);
                                                 }
                                             }
                                         }
@@ -73,10 +85,19 @@ public class DataFilter implements Runnable {
                             }
                         }
                     }
+                    stopRunning();
                 }
-
             }
-            stopRunning();
+        }
+    }
+
+    private void CreateItemIfMatchesSearch(JSONObject stashData, JSONObject currentItem) {
+        if (currentItem.get("name").toString().contains(itemName) ||
+                currentItem.get("typeLine").toString().contains(itemName)) {
+            CreateObjectForUI(stashData, currentItem);
+
+        } else if (!parameters.isEmpty() && MatchesMods(currentItem)) {
+            CreateObjectForUI(stashData, currentItem);
         }
     }
 
@@ -99,21 +120,16 @@ public class DataFilter implements Runnable {
         JSONArray mods = new JSONArray();
         if (item.get("explicitMods") != null) {
             mods.addAll((JSONArray) item.get("explicitMods"));
-//            System.out.println(item.get("explicitMods").toString());
         }
         if (item.get("implicitMods") != null) {
             mods.addAll((JSONArray) item.get("implicitMods"));
-//            System.out.println(item.get("implicitMods").toString());
         }
         if (item.get("enchantMods") != null) {
             mods.addAll((JSONArray) item.get("enchantMods"));
-//            System.out.println(item.get("enchantMods").toString());
         }
         if (item.get("craftedMods") != null) {
             mods.addAll((JSONArray) item.get("craftedMods"));
-//            System.out.println(item.get("craftedMods").toString());
         }
-//        System.out.println("--------------------------------------");
         return mods;
     }
 
@@ -128,9 +144,8 @@ public class DataFilter implements Runnable {
     private void addPriceToObject(JSONObject stashData, JSONObject currentItem, JSONObject filteredObject) {
         if (hasPrice(stashData.get("stash").toString())) {
             String[] price = stashData.get("stash").toString().split("\\s");
-            if (!price[1].equals("0")) {
-                filteredObject.put("price", price[1] + " " + price[2]);
-            }
+
+            filteredObject.put("price", price[1] + " " + price[2]);
         }
         //Make sure the "note" attribute exists before we ask for it
         else if (currentItem.get("note") != null) {
@@ -138,10 +153,8 @@ public class DataFilter implements Runnable {
             //Get price from note
             if (hasPrice(currentItem.get("note").toString())) {
                 String[] price = currentItem.get("note").toString().split("\\s");
-                //Only take items with a price
-                if (!price[1].equals("0")) {
-                    filteredObject.put("price", price[1] + " " + price[2]);
-                }
+
+                filteredObject.put("price", price[1] + " " + price[2]);
             }
         }
         //If price does not exist on item then add "Make Offer" as price since item has no set price but has been put for sale
@@ -167,6 +180,9 @@ public class DataFilter implements Runnable {
     }
 
     private boolean hasPrice(String input) {
-        return input.startsWith("~price") || input.startsWith("~b/o");
+        if (input.contains("~price") || input.contains("~b/o")) {
+            return true;
+        }
+        return false;
     }
 }

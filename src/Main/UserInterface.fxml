@@ -26,10 +26,9 @@
                                     <ListView fx:id="modListView" maxHeight="200.0" onContextMenuRequested="#DeleteModFromList" style="-fx-background-color: Darkgrey;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                                     <Button layoutX="142.0" layoutY="392.0" mnemonicParsing="false" onAction="#PerformLiveSearch" text="Start Live Search" AnchorPane.bottomAnchor="225.0" />
                                     <Button fx:id="demoButton" layoutX="14.0" layoutY="392.0" mnemonicParsing="false" onMouseClicked="#DemoUI" text="Demo" AnchorPane.bottomAnchor="225.0" AnchorPane.leftAnchor="14.0" />
-                                    <Button fx:id="demoButton2" layoutX="316.0" layoutY="392.0" mnemonicParsing="false" onMouseClicked="#DemoListPlusOne" text="+1" AnchorPane.bottomAnchor="225.0" AnchorPane.rightAnchor="14.0" />
                                     <TextField fx:id="modTextField" layoutX="21.0" layoutY="60.0" onKeyPressed="#ModTextFieldHandleEnterKeyPressed" prefHeight="34.0" prefWidth="358.0" promptText="Mods" AnchorPane.leftAnchor="21.0" AnchorPane.rightAnchor="19.0" AnchorPane.topAnchor="60.0" />
-                                    <Button layoutX="125.0" layoutY="341.0" mnemonicParsing="false" onAction="#PerformSearch" text="Perform Normal Search" AnchorPane.bottomAnchor="275.0" />
                                     <TextField fx:id="nameTextField" layoutX="21.0" layoutY="14.0" onKeyPressed="#ModTextFieldHandleEnterKeyPressed" prefHeight="34.0" prefWidth="339.0" promptText="Name" AnchorPane.leftAnchor="21.0" AnchorPane.rightAnchor="19.0" AnchorPane.topAnchor="14.0" />
+                                    <CheckBox fx:id="priceCheckBox" layoutX="155.0" layoutY="110.0" mnemonicParsing="false" prefHeight="16.0" prefWidth="104.0" text="Must have price" AnchorPane.leftAnchor="155.0" AnchorPane.rightAnchor="120.0" AnchorPane.topAnchor="110.0" />
                                  </children></AnchorPane>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                  <children>

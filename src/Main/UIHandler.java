@@ -1,9 +1,8 @@
 package Main;
 
 import javafx.event.ActionEvent;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCode;
@@ -29,27 +28,27 @@ public class UIHandler {
     public ListView<String> searchListView;
     public TabPane tabPane;
     public Button demoButton;
-    public Button demoButton2;
     public TextField modTextField;
     public TextField nameTextField;
     public ListView<String> modListView;
+    public CheckBox priceCheckBox;
 
     private final Controller controller = new Controller(this);
 
+    //Method to populate name field and add a parameter to the list
+    //with some basic inputs.
+    //Used for users with no knowledge of the possible inputs to still get a taste of the functionality
     public void DemoUI() {
+        modListView.getItems().clear();
         modListView.getItems().add("+40 to maximum Life");
-    }
-
-    public void DemoListPlusOne(MouseEvent mouseEvent) {
-        //TODO Remove when no longer need demo ware
-        AddItemToSearchListView(String.valueOf(ThreadLocalRandom.current().nextInt(0, 100)));
+        nameTextField.setText("Chaos");
     }
 
     public void Whisper(ContextMenuEvent event) {
         try {
             String pickedItem = event.getPickResult().getIntersectedNode().idProperty().getBean().toString().split("'")[1];
             if (pickedItem != null) {
-                //TODO oneline this shit
+                //TODO oneline this shit and make better
                 StringSelection selection = new StringSelection(pickedItem);
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clipboard.setContents(selection, null);
@@ -83,22 +82,15 @@ public class UIHandler {
         //TODO add proper display of items
         try {
             searchListView.getItems().add(0, "Item Name: " + input.get("itemName") + " - Price: " + input.get("price").toString());
-        } catch (Exception e){
-            System.out.println("Exception occurred on item: " + input.get("itemName") + " - " + input.get("price"));
-            System.out.println("Full item is: " + input.get("demoItem").toString());
-        }
-    }
-
-    public void PerformSearch(ActionEvent actionEvent) {
-        searchListView.getItems().clear();
-        List<String> parameters = modListView.getItems();
-        controller.PerformSearch("Normal", parameters, nameTextField.getText());
+        } catch (IllegalStateException e) {}
     }
 
     public void PerformLiveSearch(ActionEvent actionEvent) {
-        controller.KillSearchThread();
-        searchListView.getItems().clear();
-        List<String> parameters = modListView.getItems();
-        controller.PerformSearch("Live", parameters, nameTextField.getText());
+        if (!modListView.getItems().isEmpty() || !nameTextField.getText().isEmpty()) {
+            controller.KillSearchThread();
+            searchListView.getItems().clear();
+            List<String> parameters = modListView.getItems();
+            controller.PerformSearch(parameters, nameTextField.getText(), priceCheckBox.isSelected());
+        }
     }
 }

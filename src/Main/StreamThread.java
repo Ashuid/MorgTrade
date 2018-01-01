@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.TimerTask;
@@ -21,16 +22,20 @@ public class StreamThread extends TimerTask {
     private String changeID = "";
     private String name;
     private List<String> parameters;
+    private boolean priceRequirement;
     private StreamController streamController;
+    private URL url = new URL("http://www.pathofexile.com/api/public-stash-tabs");
 
-    public StreamThread(List<String> parameters, String name, StreamController streamController) {
+    public StreamThread(List<String> parameters, String name, boolean priceRequirement, StreamController streamController) throws MalformedURLException {
         this.name = name;
         this.parameters = parameters;
+        this.priceRequirement = priceRequirement;
         this.streamController = streamController;
     }
 
     public void killThread() {
         shouldRun = false;
+        Thread.currentThread().interrupt();
     }
 
     @Override
@@ -38,11 +43,8 @@ public class StreamThread extends TimerTask {
         while (shouldRun) {
             HttpURLConnection connection = null;
             try {
-                URL url;
                 if (changeID != null) {
                     url = new URL("http://www.pathofexile.com/api/public-stash-tabs?id=" + changeID);
-                } else {
-                    url = new URL("http://www.pathofexile.com/api/public-stash-tabs");
                 }
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -61,7 +63,7 @@ public class StreamThread extends TimerTask {
 
                 if (!changeID.equals(data.get("next_change_id").toString())) {
                     changeID = data.get("next_change_id").toString();
-                    streamController.handleNextBatch(data, parameters, name);
+                    streamController.handleNextBatch(data, parameters, name, priceRequirement);
                 }
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
