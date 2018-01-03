@@ -48,34 +48,39 @@ public class DataFilter implements Runnable {
                                 JSONArray itemsInStash = (JSONArray) stashData.get("items");
                                 if (!itemsInStash.isEmpty()) {
 
-                                    //Loop over all the existing items
-                                    for (Object item : (JSONArray) stashData.get("items")) {
-                                        JSONObject currentItem = (JSONObject) item;
+                                    //Filter out the empty stashes
+                                    if (stashData.get("stash") != null && !stashData.get("stash").toString().isEmpty()) {
 
-                                        //Filter out all the empty items and add the rest
-                                        if (currentItem != null) {
+                                        //Loop over all the found stash items
+                                        for (Object item : (JSONArray) stashData.get("items")) {
+                                            JSONObject currentItem = (JSONObject) item;
 
-                                            if (priceRequirement) {
+                                            //Filter out empty items
+                                            if (currentItem != null) {
 
-                                                if (!itemName.isEmpty()) {
+                                                //Start checking against user parameters
+                                                if (priceRequirement) {
 
-                                                    if (currentItem.get("note") != null) {
-                                                        if (!currentItem.get("note").toString().isEmpty() &&
-                                                                hasPrice(currentItem.get("note").toString())) {
+                                                    if (!itemName.isEmpty()) {
 
-                                                            CreateItemIfMatchesSearch(stashData, currentItem);
+                                                        if (currentItem.get("note") != null) {
+                                                            if (!currentItem.get("note").toString().isEmpty() &&
+                                                                    HasPrice(currentItem.get("note").toString())) {
+
+                                                                CreateItemIfMatchesSearch(stashData, currentItem);
+                                                            }
+                                                        } else if (stashData.get("stash") != null) {
+                                                            if (!stashData.get("stash").toString().isEmpty() &&
+                                                                    HasPrice(stashData.get("stash").toString())) {
+
+                                                                CreateItemIfMatchesSearch(stashData, currentItem);
+                                                            }
                                                         }
-                                                    } else if (stashData.get("stash") != null) {
-                                                        if (!stashData.get("stash").toString().isEmpty() &&
-                                                                hasPrice(stashData.get("stash").toString())) {
-
-                                                            CreateItemIfMatchesSearch(stashData, currentItem);
-                                                        }
+                                                    } else {
+                                                        CreateItemIfMatchesSearch(stashData, currentItem);
                                                     }
-                                                }
-                                            } else {
 
-                                                if (!itemName.isEmpty()) {
+                                                } else {
                                                     CreateItemIfMatchesSearch(stashData, currentItem);
                                                 }
                                             }
@@ -91,30 +96,110 @@ public class DataFilter implements Runnable {
         }
     }
 
+    //Match items with user parameters and call to send the item to the ui
     private void CreateItemIfMatchesSearch(JSONObject stashData, JSONObject currentItem) {
-        if (currentItem.get("name").toString().contains(itemName) ||
-                currentItem.get("typeLine").toString().contains(itemName)) {
-            CreateObjectForUI(stashData, currentItem);
+        switch (0) {
+            case 0:
+                if (itemName != null && !itemName.isEmpty()) {
 
-        } else if (!parameters.isEmpty() && MatchesMods(currentItem)) {
-            CreateObjectForUI(stashData, currentItem);
+                    if (parameters != null && !parameters.isEmpty()) {
+
+                        if (ExtractTypeLine(currentItem).contains(itemName) || ExtractItemName(currentItem).contains(itemName)) {
+                            if (MatchesMods(currentItem)) {
+                                CreateObjectForUI(stashData, currentItem);
+                                break;
+                            }
+                            break;
+                        }
+                    }
+                    if (ExtractItemName(currentItem).contains(itemName) ||
+                            currentItem.get("typeLine").toString().contains(itemName)) {
+                        CreateObjectForUI(stashData, currentItem);
+                        break;
+                    } else {
+                        break;
+                    }
+
+                } else if (parameters != null && !parameters.isEmpty() && MatchesMods(currentItem)) {
+                    CreateObjectForUI(stashData, currentItem);
+                    break;
+                }
         }
     }
 
+    //Creates a new JSONObject to send to the ui for easy data parsing without unnecessary data
     private void CreateObjectForUI(JSONObject stashData, JSONObject currentItem) {
         JSONObject filteredObject = new JSONObject();
 
-        //Add Name of Item
-        addItemNameToObject(currentItem, filteredObject);
+        //Add Name of item
+        AddItemNameToObject(currentItem, filteredObject);
 
-        //Add Price of Item
-        addPriceToObject(stashData, currentItem, filteredObject);
+        //Add typeLine to item
+        AddItemTypeLineToObject(currentItem, filteredObject);
+
+        //Add Price of item
+        AddPriceToObject(stashData, currentItem, filteredObject);
+
+        //Add sockets to item
+        if (currentItem.get("sockets") != null && !currentItem.get("sockets").toString().isEmpty()) {
+            AddSocketsToObject(currentItem, filteredObject);
+        }
+
+        //Add item level to item
+        addItemLevelToItem(currentItem, filteredObject);
 
         //Add Mods to item
-        filteredObject.put("Mods", ExtractMods(currentItem));
+        filteredObject.put("mods", ExtractMods(currentItem));
+
+        //Add the current items location to the ui item
+        filteredObject.put("x", currentItem.get("x"));
+        filteredObject.put("y", currentItem.get("y"));
+        filteredObject.put("stashName", stashData.get("stash"));
+        filteredObject.put("seller", stashData.get("lastCharacterName"));
         controller.AddItemToUISearchListView(filteredObject);
     }
 
+    //Cut out unwanted information from the name field
+    private String ExtractItemName(JSONObject item) {
+        try {
+            String itemName = item.get("name").toString();
+
+            if (itemName != null) {
+                if (itemName.contains(">>")) {
+                    String[] cleanItemName = item.get("name").toString().split(">>");
+                    itemName = cleanItemName[3];
+
+                    return itemName;
+                }
+                return itemName;
+            }
+        } catch (NullPointerException e) {
+            controller.DisplayError("Error while parsing data - the search continues");
+        }
+        return null;
+    }
+
+    //Cut out unwanted information from the typeLine field
+    private String ExtractTypeLine(JSONObject item) {
+        try {
+            String typeLine = item.get("typeLine").toString();
+
+            if (typeLine != null) {
+                if (typeLine.contains(">>")) {
+                    String[] cleanTypeLine = item.get("typeLine").toString().split(">>");
+                    typeLine = cleanTypeLine[3];
+
+                    return typeLine;
+                }
+                return typeLine;
+            }
+        } catch (NullPointerException e) {
+            controller.DisplayError("Error while parsing data - the search continues");
+        }
+        return null;
+    }
+
+    //Get all the various types of mods from the item
     private ArrayList<String> ExtractMods(JSONObject item) {
 
         JSONArray mods = new JSONArray();
@@ -133,25 +218,33 @@ public class DataFilter implements Runnable {
         return mods;
     }
 
-    //TODO Maybe fix to take what matches and above #
+    //Check if the item matches the users parameters
     private Boolean MatchesMods(JSONObject item) {
-        if (ExtractMods(item).containsAll(parameters)) {
-            return true;
+        int hitCount = 0;
+        for (String mod : ExtractMods(item)) {
+            for (String param : parameters) {
+                if (mod.equals(param)) {
+                    hitCount++;
+                }
+            }
         }
-        return false;
+        return hitCount == parameters.size();
     }
 
-    private void addPriceToObject(JSONObject stashData, JSONObject currentItem, JSONObject filteredObject) {
-        if (hasPrice(stashData.get("stash").toString())) {
+    //Extracts the items price to add to the created object for the ui
+    private void AddPriceToObject(JSONObject stashData, JSONObject currentItem, JSONObject filteredObject) {
+        if (HasPrice(stashData.get("stash").toString())) {
             String[] price = stashData.get("stash").toString().split("\\s");
 
-            filteredObject.put("price", price[1] + " " + price[2]);
+            if (price.length == 3 && price[1] != null && price[2] != null) {
+                filteredObject.put("price", price[1] + " " + price[2]);
+            }
         }
         //Make sure the "note" attribute exists before we ask for it
         else if (currentItem.get("note") != null) {
 
             //Get price from note
-            if (hasPrice(currentItem.get("note").toString())) {
+            if (HasPrice(currentItem.get("note").toString())) {
                 String[] price = currentItem.get("note").toString().split("\\s");
 
                 filteredObject.put("price", price[1] + " " + price[2]);
@@ -161,28 +254,41 @@ public class DataFilter implements Runnable {
         filteredObject.putIfAbsent("price", "Make Offer");
     }
 
-    private void addItemNameToObject(JSONObject currentItem, JSONObject filteredObject) {
-        String itemTypeLine = currentItem.get("typeLine").toString();
-        //If item is of unique quality then add the uniques name
-        if (!currentItem.get("name").toString().equals("")) {
-            String[] splitItemName = currentItem.get("name").toString().split(">>");
-            filteredObject.put("itemName", splitItemName[3]);
-        } else if (!currentItem.get("name").toString().equals("")) {
-            filteredObject.put("itemName", currentItem.get("name"));
-
-            //If item is not of unique quality then add the items typeLine
-        } else if (itemTypeLine.contains(">>")) {
-            String[] splitItemName = itemTypeLine.split(">>");
-            filteredObject.put("itemName", splitItemName[3]);
-        } else {
-            filteredObject.put("itemName", currentItem.get("typeLine"));
+    //Extracts and adds name to the object for the ui
+    private void AddItemNameToObject(JSONObject currentItem, JSONObject filteredObject) {
+        if (ExtractItemName(currentItem) != null && !ExtractItemName(currentItem).isEmpty()) {
+            filteredObject.put("itemName", ExtractItemName(currentItem));
         }
     }
 
-    private boolean hasPrice(String input) {
-        if (input.contains("~price") || input.contains("~b/o")) {
-            return true;
+    //Extracts and adds typeLine to the object for the ui
+    private void AddItemTypeLineToObject(JSONObject currentItem, JSONObject filteredObject) {
+        if (ExtractTypeLine(currentItem) != null && !ExtractTypeLine(currentItem).isEmpty()) {
+            filteredObject.put("itemTypeLine", ExtractTypeLine(currentItem));
         }
-        return false;
+    }
+
+    //Extracts and adds item level to the object for the ui
+    private void addItemLevelToItem(JSONObject currentItem, JSONObject filteredObject) {
+        if (currentItem.get("ilvl") != null && !currentItem.get("ilvl").toString().isEmpty()) {
+            filteredObject.put("ilvl", currentItem.get("ilvl"));
+        }
+    }
+
+    //Extracts and adds the sockets to the object for the ui
+    private void AddSocketsToObject(JSONObject currentItem, JSONObject filteredObject) {
+        JSONArray sockets = (JSONArray) currentItem.get("sockets");
+        List<String> filteredSockets = new ArrayList<>();
+
+        for (Object object : sockets) {
+            JSONObject socketObject = (JSONObject) object;
+            filteredSockets.add(socketObject.get("sColour").toString());
+        }
+        filteredObject.put("sockets", filteredSockets);
+    }
+
+    //Used to check if an item contains data determining price
+    private boolean HasPrice(String input) {
+        return input.contains("~price") || input.contains("~b/o");
     }
 }

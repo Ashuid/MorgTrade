@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+//Class for performing http GET calls to the API for data
 public class StreamThread extends TimerTask {
 
     private volatile boolean shouldRun = true;
@@ -26,16 +27,18 @@ public class StreamThread extends TimerTask {
     private StreamController streamController;
     private URL url = new URL("http://www.pathofexile.com/api/public-stash-tabs");
 
-    public StreamThread(List<String> parameters, String name, boolean priceRequirement, StreamController streamController) throws MalformedURLException {
+    public StreamThread(List<String> parameters, String name, boolean priceRequirement,
+                        StreamController streamController) throws MalformedURLException {
         this.name = name;
         this.parameters = parameters;
         this.priceRequirement = priceRequirement;
         this.streamController = streamController;
     }
 
+    //Kills the thread by breaking the while loop and telling the scheduler to never restart the thread
     public void killThread() {
         shouldRun = false;
-        Thread.currentThread().interrupt();
+        this.cancel();
     }
 
     @Override
@@ -51,23 +54,20 @@ public class StreamThread extends TimerTask {
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setDoOutput(true);
 
-                int responseCode = connection.getResponseCode();
-                System.out.println("API query returned http code: " + responseCode);
+                if (connection.getResponseCode() == 200) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    JSONParser jsonParser = new JSONParser();
 
-                JSONParser jsonParser = new JSONParser();
+                    JSONObject data = (JSONObject) jsonParser.parse(reader.readLine());
 
-
-                JSONObject data = (JSONObject) jsonParser.parse(reader.readLine());
-
-                if (!changeID.equals(data.get("next_change_id").toString())) {
-                    changeID = data.get("next_change_id").toString();
-                    streamController.handleNextBatch(data, parameters, name, priceRequirement);
+                    if (!changeID.equals(data.get("next_change_id").toString())) {
+                        changeID = data.get("next_change_id").toString();
+                        streamController.handleNextBatch(data, parameters, name, priceRequirement);
+                    }
                 }
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-                System.out.println("Error occurred in StreamThread");
+            } catch (NullPointerException | IOException | ParseException e) {
+                streamController.DisplayError("Error while getting data - Service might be down");
             } finally {
                 if (connection != null) {
                     connection.disconnect();

@@ -27,6 +27,10 @@ public class Controller {
         streamController.Search(parameters, name, priceRequirement);
     }
 
+    public void DisplayError(String str){
+        uiHandler.DisplayError(str);
+    }
+
     public void KillSearchThread() {
         streamController.killThread();
     }

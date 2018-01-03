@@ -19,28 +19,37 @@ public class StreamController {
         SearchWithStream(parameters, name, priceRequirement);
     }
 
+    //Used to start a thread which performs the API queries
     private void SearchWithStream(List<String> parameters, String name, boolean priceRequirement) {
         try {
             Timer time = new Timer();
             StreamThread thread = new StreamThread(parameters, name, priceRequirement, this);
 
             streamThread = thread;
-            time.schedule(thread, 0, 5000);
-
+            time.schedule(thread, 0, 10000);
         } catch (MalformedURLException e) {
-            System.out.println("Error in stream creation");
+            controller.DisplayError("Error in URL creation - Service might be down");
         }
     }
 
+    //Used by the stream thread to send information to a data filter thread
     public void handleNextBatch(JSONObject data, List<String> parameters, String name, boolean priceRequirement) {
         controller.ParseIncomingDataFromStream(data, parameters, name, priceRequirement);
     }
 
+    //Used to route errors to the ui
+    public void DisplayError(String str) {
+        controller.DisplayError(str);
+    }
+
+    //Used to "kill" the thread.
+    //As the thread is running uninterruptable methods this might take a moment to take effect
     public void killThread() {
         try {
             streamThread.killThread();
+            streamThread.cancel();
         } catch (Exception e) {
-            System.out.println("Could not kill StreamThread");
+            controller.DisplayError("Error in thread deconstruction");
         }
     }
 }

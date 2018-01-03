@@ -1,27 +1,25 @@
 package Main;
 
-import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.StringJoiner;
 
 //TODO Leg med idéen om currency conversion table / Forklar hvorfor det ikke blev til : lightweight
 
 //TODO Spørg og få quotes fra yuki og morten om hvad programmet skal kunne, usecase like.
-
-//TODO fix alle try-catches så det bliver vist i UI
 
 //Controller for the JavaFX UI element. Handles all user interactions.
 public class UIHandler {
@@ -32,8 +30,11 @@ public class UIHandler {
     public TextField nameTextField;
     public ListView<String> modListView;
     public CheckBox priceCheckBox;
+    public Button startSearchButton;
+    public Label errorLabel;
 
     private final Controller controller = new Controller(this);
+    private ArrayList<JSONObject> itemList = new ArrayList<>();
 
     //Method to populate name field and add a parameter to the list
     //with some basic inputs.
@@ -41,56 +42,120 @@ public class UIHandler {
     public void DemoUI() {
         modListView.getItems().clear();
         modListView.getItems().add("+40 to maximum Life");
-        nameTextField.setText("Chaos");
+        nameTextField.setText("Leather");
     }
 
-    public void Whisper(ContextMenuEvent event) {
-        try {
-            String pickedItem = event.getPickResult().getIntersectedNode().idProperty().getBean().toString().split("'")[1];
-            if (pickedItem != null) {
-                //TODO oneline this shit and make better
-                StringSelection selection = new StringSelection(pickedItem);
-                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                clipboard.setContents(selection, null);
-                System.out.println("Text copied to clipboard: " + pickedItem);
-            }
-        } catch (Exception ignored) {
+    //Used to format items into strings the user can use to buy the items
+    private String FormatWhisper(JSONObject item) {
+        StringJoiner joiner = new StringJoiner(" ");
+        joiner.add("@" + item.get("seller"))
+                .add("Hi, I'd like to buy your " + CombineItemNameAndTypeIfPossible(item))
+                .add("for my " + item.get("price"))
+                .add("( Located in " + item.get("stashName"))
+                .add("; Position: Left " + item.get("x"))
+                .add(", Top " + item.get("y"))
+                .add(")");
+
+        return joiner.toString();
+    }
+
+    //Used to create a full identification of items
+    private String CombineItemNameAndTypeIfPossible(JSONObject obj) {
+        if (obj.get("itemName") != null && !obj.get("itemName").toString().isEmpty()) {
+            return obj.get("itemName").toString() + ", " + obj.get("itemTypeLine").toString();
+        } else {
+            return obj.get("itemTypeLine").toString();
         }
     }
 
+    //Handler for right clicking items to get buy information to clipboard
+    public void Whisper(MouseEvent event) {
+        if (event.getButton() == MouseButton.SECONDARY) {
+            int index = searchListView.getSelectionModel().getSelectedIndex();
+            if (index > -1) {
+                JSONObject pickedItem = itemList.get(index);
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                StringSelection selection = new StringSelection(FormatWhisper(pickedItem));
+                clipboard.setContents(selection, null);
+            }
+        }
+    }
+
+    //Used to remove mods from the list of mods to search for
     public void DeleteModFromList(ContextMenuEvent event) {
         try {
             modListView.getItems().remove(modListView.getSelectionModel().getSelectedIndex());
             modTextField.requestFocus();
-        } catch (Exception exception) {
-            System.out.println("An error occurred in the controller @ DeleteModFromListMethod");
+        } catch (ArrayIndexOutOfBoundsException exception) {
+            //Ignored as this is caused by right clicking empty space in the mod list
         }
     }
 
+    //Adds mods to the mod search list when user presses the enter key
     public void ModTextFieldHandleEnterKeyPressed(KeyEvent keyEvent) {
-        if (keyEvent.getCode().equals(KeyCode.ENTER) && !Objects.equals(modTextField.getText().replaceAll("\\s", ""), "")) {
+        if (keyEvent.getCode().equals(KeyCode.ENTER) &&
+                !Objects.equals(modTextField.getText().replaceAll("\\s", ""), "")) {
             modListView.getItems().add(0, modTextField.getText());
             modTextField.clear();
         }
     }
 
-    public void AddItemToSearchListView(String input) {
-        searchListView.getItems().add(0, input);
-    }
-
+    //Adds items to the list for the user to browse
     public void AddItemToSearchListView(JSONObject input) {
-        //TODO add proper display of items
         try {
-            searchListView.getItems().add(0, "Item Name: " + input.get("itemName") + " - Price: " + input.get("price").toString());
-        } catch (IllegalStateException e) {}
+            //Limit amount of items displayed in the UI to limit memory usage
+            if (searchListView.getItems().size() > 150) {
+                searchListView.getItems().remove(searchListView.getItems().size() - 1);
+                itemList.remove(searchListView.getItems().size() - 1);
+            }
+
+            StringJoiner joiner = new StringJoiner(" ");
+
+            joiner.add(CombineItemNameAndTypeIfPossible(input));
+
+            joiner.add("| Price: " + input.get("price").toString());
+
+            if (input.get("sockets") != null && !input.get("sockets").toString().isEmpty()) {
+                joiner.add("Sockets:");
+                for (String str : (List<String>) input.get("sockets")) {
+                    joiner.add(str);
+                }
+            }
+
+            if (input.get("ilvl") != null && !input.get("ilvl").toString().isEmpty()) {
+                joiner.add("Item level: " + input.get("ilvl").toString());
+            }
+
+            if (input.get("mods") != null && !input.get("mods").toString().isEmpty()) {
+                JSONArray mods = (JSONArray) input.get("mods");
+
+                joiner.add("Mods:");
+                for (Object obj : mods) {
+                    joiner.add(obj.toString());
+                }
+            }
+
+            itemList.add(0, input);
+            searchListView.getItems().add(0, joiner.toString());
+
+        } catch (Exception e) {
+            DisplayError("Error occurred while adding an item to the list");
+        }
     }
 
-    public void PerformLiveSearch(ActionEvent actionEvent) {
+    //Used to display any meaningful errors to the user
+    public void DisplayError(String str) {
+        errorLabel.setText(str);
+    }
+
+    //Starts the search with the users parameters and calls for the existing search thread to stop
+    public void PerformLiveSearch(MouseEvent mouseEvent) {
         if (!modListView.getItems().isEmpty() || !nameTextField.getText().isEmpty()) {
             controller.KillSearchThread();
             searchListView.getItems().clear();
             List<String> parameters = modListView.getItems();
             controller.PerformSearch(parameters, nameTextField.getText(), priceCheckBox.isSelected());
+            DisplayError("Searching");
         }
     }
 }
