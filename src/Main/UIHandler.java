@@ -32,8 +32,10 @@ public class UIHandler {
     public CheckBox priceCheckBox;
     public Button startSearchButton;
     public Label errorLabel;
+    public Button stopSearchButton;
 
     private final Controller controller = new Controller(this);
+
     private ArrayList<JSONObject> itemList = new ArrayList<>();
 
     //Method to populate name field and add a parameter to the list
@@ -157,5 +159,9 @@ public class UIHandler {
             controller.PerformSearch(parameters, nameTextField.getText(), priceCheckBox.isSelected());
             DisplayError("Searching");
         }
+    }
+
+    public void StopSearch(MouseEvent mouseEvent) {
+        controller.KillSearchThread();
     }
 }

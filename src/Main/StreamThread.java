@@ -46,7 +46,7 @@ public class StreamThread extends TimerTask {
         while (shouldRun) {
             HttpURLConnection connection = null;
             try {
-                if (changeID != null) {
+                if (changeID != null && !changeID.isEmpty()) {
                     url = new URL("http://www.pathofexile.com/api/public-stash-tabs?id=" + changeID);
                 }
                 connection = (HttpURLConnection) url.openConnection();
