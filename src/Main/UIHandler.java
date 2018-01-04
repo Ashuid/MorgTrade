@@ -124,11 +124,11 @@ public class UIHandler {
                 }
             }
 
-            if (input.get("ilvl") != null && !input.get("ilvl").toString().isEmpty()) {
+            if (input.get("ilvl") != null && !input.get("ilvl").toString().isEmpty() && !input.get("ilvl").toString().equals("0")) {
                 joiner.add("Item level: " + input.get("ilvl").toString());
             }
 
-            if (input.get("mods") != null && !input.get("mods").toString().isEmpty()) {
+            if (input.get("mods") != null && !input.get("mods").toString().isEmpty() && !input.get("mods").toString().contains("<currencyitem>")) {
                 JSONArray mods = (JSONArray) input.get("mods");
 
                 joiner.add("Mods:");
