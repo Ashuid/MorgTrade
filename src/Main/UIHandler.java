@@ -105,46 +105,56 @@ public class UIHandler {
     public void AddItemToSearchListView(JSONObject input) {
         try {
             //Limit amount of items displayed in the UI to limit memory usage
-            if (searchListView.getItems().size() > 150) {
+            if (searchListView.getItems().size() > 100) {
                 searchListView.getItems().remove(searchListView.getItems().size() - 1);
                 itemList.remove(searchListView.getItems().size() - 1);
             }
 
-            StringJoiner joiner = new StringJoiner(" ");
-
-            joiner.add(CombineItemNameAndTypeIfPossible(input));
-
-            joiner.add("| Price: " + input.get("price").toString());
-
-            if (input.get("sockets") != null && !input.get("sockets").toString().isEmpty()) {
-                joiner.add("Sockets:");
-                for (String str : (List<String>) input.get("sockets")) {
-                    joiner.add(str);
+            //Make sure the same seller isn't performing market manipulation
+            int manipulationCount = 0;
+            for (JSONObject object : itemList) {
+                if (object.get("seller").toString().equals(input.get("seller"))) {
+                    manipulationCount++;
                 }
             }
 
-            if (input.get("ilvl") != null && !input.get("ilvl").toString().isEmpty() && !input.get("ilvl").toString().equals("0")) {
-                joiner.add("Item level: " + input.get("ilvl").toString());
-            }
+            //If there is no sign of market manipulation on the item then we add it
+            if (manipulationCount < 2) {
+                StringJoiner joiner = new StringJoiner(" ");
 
-            if (input.get("mods") != null && !input.get("mods").toString().isEmpty() && !input.get("mods").toString().contains("<currencyitem>")) {
-                JSONArray mods = (JSONArray) input.get("mods");
+                joiner.add(CombineItemNameAndTypeIfPossible(input));
 
-                joiner.add("Mods:");
-                for (Object obj : mods) {
-                    joiner.add(obj.toString());
+                joiner.add("| Price: " + input.get("price").toString());
+
+                if (input.get("sockets") != null && !input.get("sockets").toString().isEmpty()) {
+                    joiner.add("Sockets:");
+                    for (String str : (List<String>) input.get("sockets")) {
+                        joiner.add(str);
+                    }
                 }
+
+                if (input.get("ilvl") != null && !input.get("ilvl").toString().isEmpty() && !input.get("ilvl").toString().equals("0")) {
+                    joiner.add("Item level: " + input.get("ilvl").toString());
+                }
+
+                if (input.get("mods") != null && !input.get("mods").toString().isEmpty() && !input.get("mods").toString().contains("<currencyitem>")) {
+                    JSONArray mods = (JSONArray) input.get("mods");
+
+                    joiner.add("Mods:");
+                    for (Object obj : mods) {
+                        joiner.add(obj.toString());
+                    }
+                }
+
+                itemList.add(0, input);
+                Platform.runLater(() -> searchListView.getItems().add(0, joiner.toString()));
             }
-
-            itemList.add(0, input);
-            Platform.runLater(() -> searchListView.getItems().add(0, joiner.toString()));
-
         } catch (Exception e) {
             DisplayError("Error occurred while adding an item to the list");
         }
     }
 
-    //Used to display any meaningful errors to the user
+    //Used to display any meaningful errors or general info to the user
     public void DisplayError(String str) {
         Platform.runLater(() -> errorLabel.setText(str));
     }
