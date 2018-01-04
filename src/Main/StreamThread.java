@@ -66,6 +66,7 @@ public class StreamThread extends TimerTask {
                         streamController.handleNextBatch(data, parameters, name, priceRequirement);
                     }
                 }
+                streamController.DisplayError("Current page number: " + changeID);
             } catch (NullPointerException | IOException | ParseException e) {
                 streamController.DisplayError("Error while getting data - Service might be down");
             } finally {

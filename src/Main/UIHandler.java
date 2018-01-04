@@ -1,5 +1,6 @@
 package Main;
 
+import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -136,7 +137,7 @@ public class UIHandler {
             }
 
             itemList.add(0, input);
-            searchListView.getItems().add(0, joiner.toString());
+            Platform.runLater(() -> searchListView.getItems().add(0, joiner.toString()));
 
         } catch (Exception e) {
             DisplayError("Error occurred while adding an item to the list");
@@ -145,7 +146,7 @@ public class UIHandler {
 
     //Used to display any meaningful errors to the user
     public void DisplayError(String str) {
-        errorLabel.setText(str);
+        Platform.runLater(() -> errorLabel.setText(str));
     }
 
     //Starts the search with the users parameters and calls for the existing search thread to stop
