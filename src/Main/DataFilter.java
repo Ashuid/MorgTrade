@@ -38,53 +38,37 @@ public class DataFilter implements Runnable {
                     for (Object value : array) {
                         JSONObject stashData = (JSONObject) value;
 
-                        //Filter out all stashes from accounts that no longer exist
-                        if (stashData.get("accountName") != null) {
+                        if (ContainsViableData(stashData)) {
 
-                            //Filter out all the stashes that does not contain items for sale
-                            if (stashData.get("public") != null) {
+                            //Loop over all the found stash items
+                            for (Object item : (JSONArray) stashData.get("items")) {
+                                JSONObject currentItem = (JSONObject) item;
 
-                                //Filter out all stashes that does not contain items
-                                JSONArray itemsInStash = (JSONArray) stashData.get("items");
-                                if (!itemsInStash.isEmpty()) {
+                                //Filter out empty items
+                                if (currentItem != null) {
+                                    //Start checking against user parameters
+                                    if (priceRequirement) {
 
-                                    //Filter out the empty stashes
-                                    if (stashData.get("stash") != null && !stashData.get("stash").toString().isEmpty()) {
+                                        if (!itemName.isEmpty()) {
 
-                                        //Loop over all the found stash items
-                                        for (Object item : (JSONArray) stashData.get("items")) {
-                                            JSONObject currentItem = (JSONObject) item;
+                                            if (currentItem.get("note") != null) {
+                                                if (!currentItem.get("note").toString().isEmpty() &&
+                                                        HasPrice(currentItem.get("note").toString())) {
 
-                                            //Filter out empty items
-                                            if (currentItem != null) {
+                                                    CreateItemIfMatchesSearch(stashData, currentItem);
+                                                }
+                                            } else if (stashData.get("stash") != null) {
+                                                if (!stashData.get("stash").toString().isEmpty() &&
+                                                        HasPrice(stashData.get("stash").toString())) {
 
-                                                //Start checking against user parameters
-                                                if (priceRequirement) {
-
-                                                    if (!itemName.isEmpty()) {
-
-                                                        if (currentItem.get("note") != null) {
-                                                            if (!currentItem.get("note").toString().isEmpty() &&
-                                                                    HasPrice(currentItem.get("note").toString())) {
-
-                                                                CreateItemIfMatchesSearch(stashData, currentItem);
-                                                            }
-                                                        } else if (stashData.get("stash") != null) {
-                                                            if (!stashData.get("stash").toString().isEmpty() &&
-                                                                    HasPrice(stashData.get("stash").toString())) {
-
-                                                                CreateItemIfMatchesSearch(stashData, currentItem);
-                                                            }
-                                                        }
-                                                    } else {
-                                                        CreateItemIfMatchesSearch(stashData, currentItem);
-                                                    }
-
-                                                } else {
                                                     CreateItemIfMatchesSearch(stashData, currentItem);
                                                 }
                                             }
+                                        } else {
+                                            CreateItemIfMatchesSearch(stashData, currentItem);
                                         }
+                                    } else {
+                                        CreateItemIfMatchesSearch(stashData, currentItem);
                                     }
                                 }
                             }
@@ -285,6 +269,27 @@ public class DataFilter implements Runnable {
             filteredSockets.add(socketObject.get("sColour").toString());
         }
         filteredObject.put("sockets", filteredSockets);
+    }
+
+    private boolean ContainsViableData(JSONObject stashData) {
+        //Filter out all stashes from accounts that no longer exist
+        if (stashData.get("accountName") != null) {
+
+            //Filter out all the stashes that does not contain items for sale
+            if (stashData.get("public") != null) {
+
+                //Filter out all stashes that does not contain items
+                JSONArray itemsInStash = (JSONArray) stashData.get("items");
+                if (!itemsInStash.isEmpty()) {
+
+                    //Filter out the empty stashes
+                    if (stashData.get("stash") != null && !stashData.get("stash").toString().isEmpty()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     //Used to check if an item contains data determining price

@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-//TODO Leg med idéen om currency conversion table / Forklar hvorfor det ikke blev til : lightweight
-
 //TODO Spørg og få quotes fra yuki og morten om hvad programmet skal kunne, usecase like.
 
 //Controller for the JavaFX UI element. Handles all user interactions.
