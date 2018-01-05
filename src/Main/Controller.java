@@ -31,7 +31,11 @@ public class Controller {
         uiHandler.DisplayError(str);
     }
 
-    public void KillSearchThread() {
-        streamController.killThread();
+    public void StopStartSearchThread() {
+        streamController.StopStartThread();
+    }
+
+    public void KillThread(){
+        streamController.KillThread();
     }
 }

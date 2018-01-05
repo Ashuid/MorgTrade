@@ -36,9 +36,8 @@ public class StreamThread extends TimerTask {
     }
 
     //Kills the thread by breaking the while loop and telling the scheduler to never restart the thread
-    public void killThread() {
-        shouldRun = false;
-        this.cancel();
+    public void StopStartThread() {
+        shouldRun = !shouldRun;
     }
 
     @Override

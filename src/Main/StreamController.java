@@ -44,12 +44,15 @@ public class StreamController {
 
     //Used to "kill" the thread.
     //As the thread is running uninterruptable methods this might take a moment to take effect
-    public void killThread() {
+    public void StopStartThread() {
         try {
-            streamThread.killThread();
-            streamThread.cancel();
+            streamThread.StopStartThread();
         } catch (Exception e) {
             controller.DisplayError("Error in thread deconstruction");
         }
+    }
+
+    public void KillThread() {
+        streamThread.cancel();
     }
 }

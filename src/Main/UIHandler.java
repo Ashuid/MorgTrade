@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -126,6 +127,8 @@ public class UIHandler {
 
                 joiner.add("| Price: " + input.get("price").toString());
 
+                joiner.add("Seller: " + input.get("seller").toString());
+
                 if (input.get("sockets") != null && !input.get("sockets").toString().isEmpty()) {
                     joiner.add("Sockets:");
                     for (String str : (List<String>) input.get("sockets")) {
@@ -162,7 +165,12 @@ public class UIHandler {
     //Starts the search with the users parameters and calls for the existing search thread to stop
     public void PerformLiveSearch(MouseEvent mouseEvent) {
         if (!modListView.getItems().isEmpty() || !nameTextField.getText().isEmpty()) {
-            controller.KillSearchThread();
+            try {
+                controller.KillThread();
+            }catch (NullPointerException e){
+                //Ignored as this is caused by an attempt to kill a non existing thread
+            }
+
             searchListView.getItems().clear();
             List<String> parameters = modListView.getItems();
             controller.PerformSearch(parameters, nameTextField.getText(), priceCheckBox.isSelected());
@@ -171,6 +179,6 @@ public class UIHandler {
     }
 
     public void StopSearch(MouseEvent mouseEvent) {
-        controller.KillSearchThread();
+        controller.StopStartSearchThread();
     }
 }
