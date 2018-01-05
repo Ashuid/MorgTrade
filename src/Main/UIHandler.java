@@ -93,7 +93,7 @@ public class UIHandler {
         }
     }
 
-    //Adds mods to the mod search list when user presses the enter key
+    //Adds mods to the mod search list when user presses the enter key.
     public void ModTextFieldHandleEnterKeyPressed(KeyEvent keyEvent) {
         if (keyEvent.getCode().equals(KeyCode.ENTER) &&
                 !Objects.equals(modTextField.getText().replaceAll("\\s", ""), "")) {
