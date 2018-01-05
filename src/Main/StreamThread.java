@@ -35,11 +35,12 @@ public class StreamThread extends TimerTask {
         this.streamController = streamController;
     }
 
-    //Kills the thread by breaking the while loop and telling the scheduler to never restart the thread
+    //Inverts the "shouldRun" boolean which temporarily pauses the while loop in the thread
     public void StopStartThread() {
         shouldRun = !shouldRun;
     }
 
+    //Kills the thread by breaking the while loop and telling the scheduler to never restart the thread
     public void KillThread(){
         shouldRun = false;
         this.cancel();

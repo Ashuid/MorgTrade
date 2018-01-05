@@ -19,7 +19,9 @@ public class StreamController {
         SearchWithStream(parameters, name, priceRequirement);
     }
 
-    //Used to start a thread which performs the API queries
+    //Used to start a thread which performs the API queries.
+    //The thread is run with the functionality of Timer.schedule
+    //This allows the thread to "restart" should it get stuck for any reason.
     private void SearchWithStream(List<String> parameters, String name, boolean priceRequirement) {
         try {
             Timer time = new Timer();
@@ -42,7 +44,7 @@ public class StreamController {
         controller.DisplayError(str);
     }
 
-    //Used to "kill" the thread.
+    //Used to pause and resume the thread.
     //As the thread is running uninterruptable methods this might take a moment to take effect
     public void StopStartThread() {
         try {
@@ -52,6 +54,8 @@ public class StreamController {
         }
     }
 
+    //Used to kill the thread.
+    //As the thread is running uninterruptable methods this might take a moment to take effect
     public void KillThread() {
         streamThread.KillThread();
     }
