@@ -40,6 +40,11 @@ public class StreamThread extends TimerTask {
         shouldRun = !shouldRun;
     }
 
+    public void KillThread(){
+        shouldRun = false;
+        this.cancel();
+    }
+
     @Override
     public void run() {
         while (shouldRun) {

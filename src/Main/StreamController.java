@@ -53,6 +53,6 @@ public class StreamController {
     }
 
     public void KillThread() {
-        streamThread.cancel();
+        streamThread.KillThread();
     }
 }
